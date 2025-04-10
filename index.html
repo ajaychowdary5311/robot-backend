@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Smart Delivery Robot</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background: linear-gradient(135deg, #1e3c72, #2a5298);
+      color: white;
+      text-align: center;
+    }
+
+    .container {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 40px;
+      border-radius: 15px;
+      box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2);
+      width: 380px;
+      transition: transform 0.3s ease;
+    }
+
+    .container:hover {
+      transform: scale(1.02);
+    }
+
+    h1 {
+      font-size: 28px;
+      font-weight: 600;
+      margin-bottom: 5px;
+    }
+
+    .subtitle {
+      font-size: 16px;
+      color: #ddd;
+      margin-bottom: 20px;
+    }
+
+    .buttons button {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border: none;
+      border-radius: 8px;
+      font-size: 18px;
+      cursor: pointer;
+      transition: 0.3s;
+      font-weight: 500;
+      letter-spacing: 1px;
+    }
+
+    #sendParcelBtn {
+      background: #ff9800;
+      color: white;
+    }
+
+    #sendParcelBtn:hover {
+      background: #e68900;
+      transform: scale(1.05);
+    }
+
+    #unlockRobotBtn {
+      background: #4caf50;
+      color: white;
+    }
+
+    #unlockRobotBtn:hover {
+      background: #3d8c40;
+      transform: scale(1.05);
+    }
+
+    #notifyArrivalBtn {
+      background: #2196f3;
+      color: white;
+    }
+
+    #notifyArrivalBtn:hover {
+      background: #1976d2;
+      transform: scale(1.05);
+    }
+
+    .form-container {
+      margin-top: 20px;
+      background: rgba(255, 255, 255, 0.15);
+      padding: 20px;
+      border-radius: 10px;
+      backdrop-filter: blur(5px);
+      box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+      animation: fadeIn 0.3s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .form-container h2 {
+      font-size: 22px;
+      margin-bottom: 10px;
+    }
+
+    .form-container input {
+      width: 100%;
+      padding: 12px;
+      margin: 8px 0;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      text-align: center;
+    }
+
+    .form-container button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 10px;
+      background: #2196f3;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 18px;
+      transition: 0.3s;
+    }
+
+    .form-container button:hover {
+      background: #1976d2;
+      transform: scale(1.05);
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    p {
+      margin-top: 10px;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>🚀 Smart Delivery Robot</h1>
+    <p class="subtitle">Secure. Fast. Reliable.</p>
+
+    <div class="buttons">
+      <button id="sendParcelBtn" onclick="showForm('sendParcelForm')">📤 Send Parcel</button>
+      <button id="unlockRobotBtn" onclick="showForm('unlockRobotForm')">🔓 Unlock Robot</button>
+      <button id="notifyArrivalBtn" onclick="notifyArrival()">📍 Notify Arrival</button>
+    </div>
+
+    <!-- Send Parcel Form -->
+    <div id="sendParcelForm" class="form-container hidden">
+      <h2>📦 Send Parcel</h2>
+      <input type="email" id="customerEmail" placeholder="Enter Customer Email" required />
+      <input type="text" id="customerLocation" placeholder="Enter Delivery Location" required />
+      <button onclick="sendParcel()">Send OTP</button>
+      <p id="sendParcelMessage"></p>
+    </div>
+
+    <!-- Unlock Robot Form -->
+    <div id="unlockRobotForm" class="form-container hidden">
+      <h2>🔑 Unlock Robot</h2>
+      <input type="email" id="unlockEmail" placeholder="Enter Your Email" required />
+      <input type="text" id="otp" placeholder="Enter OTP" required />
+      <button onclick="unlockRobot()">Unlock</button>
+      <p id="unlockMessage"></p>
+    </div>
+  </div>
+
+  <script>
+    function showForm(formId) {
+      document.getElementById("sendParcelForm").classList.add("hidden");
+      document.getElementById("unlockRobotForm").classList.add("hidden");
+      document.getElementById(formId).classList.remove("hidden");
+    }
+
+    function sendParcel() {
+      const customerEmail = document.getElementById("customerEmail").value;
+      const customerLocation = document.getElementById("customerLocation").value;
+      const messageEl = document.getElementById("sendParcelMessage");
+
+      if (!customerEmail || !customerLocation) {
+        alert("Please enter both email and location!");
+        return;
+      }
+
+      messageEl.textContent = "";
+
+      fetch("https://robot-backend-abc123.onrender.com/send_parcel", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ customer_email: customerEmail, location: customerLocation })
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          messageEl.textContent = data.message || data.error;
+          setTimeout(() => (messageEl.textContent = ""), 5000);
+          if (data.message) {
+            document.getElementById("customerEmail").value = "";
+            document.getElementById("customerLocation").value = "";
+          }
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+          messageEl.textContent = "An error occurred!";
+          setTimeout(() => (messageEl.textContent = ""), 5000);
+        });
+    }
+
+    function unlockRobot() {
+      const unlockEmail = document.getElementById("unlockEmail").value;
+      const otp = document.getElementById("otp").value;
+      const messageEl = document.getElementById("unlockMessage");
+
+      if (!unlockEmail || !otp) {
+        alert("Please fill all fields!");
+        return;
+      }
+
+      messageEl.textContent = "";
+
+      fetch("https://robot-backend-abc123.onrender.com/unlock_robot", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ customer_email: unlockEmail, otp: otp })
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          messageEl.textContent = data.message || data.error;
+          setTimeout(() => (messageEl.textContent = ""), 5000);
+          if (data.message) {
+            document.getElementById("unlockEmail").value = "";
+            document.getElementById("otp").value = "";
+          }
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+          messageEl.textContent = "An error occurred!";
+          setTimeout(() => (messageEl.textContent = ""), 5000);
+        });
+    }
+
+    function notifyArrival() {
+      const customerEmail = document.getElementById("unlockEmail").value;
+
+      if (!customerEmail) {
+        alert("Enter your email to notify arrival!");
+        return;
+      }
+
+      fetch("https://robot-backend-abc123.onrender.com/robot_reached", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ customer_email: customerEmail })
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          alert(data.message || data.error);
+        })
+        .catch((error) => console.error("Error:", error));
+    }
+  </script>
+</body>
+</html>
